@@ -59,11 +59,11 @@ def main():
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    # Release the camera.
-    cam.release()
-
     #  Destroy the window.
     cv2.destroyAllWindows()
+
+    # Release the camera.
+    cam.release()
 
     # Print the text
     print(text)
