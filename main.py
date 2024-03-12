@@ -1,5 +1,6 @@
 import cv2
 import pytesseract
+from colorama import Fore
 
 # mention the installed location of Tesseract-OCR in your system.
 pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
@@ -8,81 +9,31 @@ pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesse
 def main():
     print("Starting the program...")
 
-    # Start Capturing the camera feed
-    start_feed = True
+    # List of images
+    image = ['label1.png', 'label2.png', 'label3.png']
 
     # Output text
-    text = None
-
-    # Get the camera port
-    cam_port = 0
-
-    # Open the camera
-    cam = cv2.VideoCapture(cam_port)
-
-    # Start a OpenCV window to display the camera feed
-    cv2.namedWindow('Preview Feed')
-
-    # Set the window size
-    cv2.resizeWindow('Preview Feed', 640, 480)
-
-    # Wait For Key Press
-    cv2.waitKey(0)
+    text_list = []
 
     # Finished Loading OpenCV
     print("Finished loading OpenCV.")
 
-    while True:
-        # Read the camera feed
-        ret, frame = cam.read()
+    # Number
+    i = 0
 
-        # If the camera feed is empty, break the loop
-        if not ret:
-            break
+    # Read the images
+    for img in image:
+        text = read_image(img)
 
-        # Start the camera feed
-        if cv2.waitKey(1) & 0xFF == ord('s'):
-            start_feed = not start_feed
-
-        # Display the camera feed
-        if start_feed:
-            cv2.imshow('Preview Feed', frame)
-
-        # Capture the image
-        if cv2.waitKey(1) & 0xFF == ord('c'):
-            image = capture_image(cam)
-            cv2.imshow('Preview Feed', image)
-            text = read_image()
-            start_feed = False
-
-        # Wait for the Q key to be pressed
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    #  Destroy the window.
-    cv2.destroyAllWindows()
-
-    # Release the camera.
-    cam.release()
-
-    # Print the text
-    print(text)
+        text_list.append(text)
+        print(text_list[i])
+        if i != len(image) - 1:
+            print(f'{Fore.RED}New label:{Fore.WHITE}\n')
+        i += 1
 
 
-def capture_image(cam):
-    result, image = cam.read()
-
-    cv2.imwrite("label.jpg", image)
-
-    if result:
-        return image
-
-    return None
-
-
-def read_image():
-    # Read the image
-    image = cv2.imread("label.jpg")
+def read_image(img):
+    image = cv2.imread(img)
 
     # Convert the image to gray scale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -91,7 +42,8 @@ def read_image():
     noise = cv2.medianBlur(gray, 3)
 
     # Threshold the image
-    thresh = cv2.threshold(noise, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+    thresh = cv2.adaptiveThreshold(noise, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                   cv2.THRESH_BINARY,11,2)
 
     cv2.imwrite("thresh.jpg", thresh)
 
